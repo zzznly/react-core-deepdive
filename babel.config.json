@@ -1,10 +1,13 @@
 {
+  "presets": ["@babel/preset-env"],
   "plugins": [
     [
       "@babel/plugin-transform-react-jsx",
       {
         "pragma": "React.createElement",
-        "pragmaFrag": "React.Fragment"
+        "pragmaFrag": "React.Fragment",
+        "runtime": "automatic",
+        "importSource": "/src/lib/core/ReactJSXElement.js"
       }
     ]
   ]
