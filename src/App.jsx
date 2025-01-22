@@ -1,11 +1,11 @@
-import Header from "../src/components/header/Header";
-import Main from "../src/components/main/Main";
+import Content from "./components/content/Content";
+import Header from "./components/header/Header";
 
 export default function App() {
   return (
     <div id="app">
       <Header />
-      <Main />
+      <Content />
     </div>
   );
 }
