@@ -1,5 +1,5 @@
-import App from "./App";
+import App from "./App.jsx";
 
-const result = App();
+const appElement = App();
 
-console.log("#App: ", JSON.stringify(result, null, 2));
+console.log(JSON.stringify(appElement, null, 2));
