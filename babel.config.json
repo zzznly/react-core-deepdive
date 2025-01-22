@@ -4,10 +4,8 @@
     [
       "@babel/plugin-transform-react-jsx",
       {
-        "pragma": "React.createElement",
-        "pragmaFrag": "React.Fragment",
         "runtime": "automatic",
-        "importSource": "/src/lib/core/ReactJSXElement.js"
+        "importSource": "@/libs/jsx"
       }
     ]
   ]
