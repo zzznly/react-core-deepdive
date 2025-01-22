@@ -1,5 +1,5 @@
 import App from "./App.jsx";
+import React from "../libs/core/React";
 
-const appElement = App();
-
-console.log(JSON.stringify(appElement, null, 2));
+const app = document.getElementById("root");
+React.render(App(), app);
