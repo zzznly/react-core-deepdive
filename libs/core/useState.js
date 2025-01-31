@@ -1,23 +1,17 @@
 import { rerender } from "./rerender";
 
-export const useState = (initialValue) => {
-  let stateIndex = 0;
-  const states = [];
+let states = [];
+let stateIndex = 0;
 
-  const stateIndexSnapshot = stateIndex;
-  stateIndex++;
+export function useState(initialValue) {
+  const currentIndex = stateIndex;
+  states[currentIndex] = states[currentIndex] ?? initialValue;
 
-  if (states[stateIndexSnapshot] === undefined) {
-    states.push(initialValue);
+  function setState(newValue) {
+    states[currentIndex] = newValue;
+    rerender();
   }
 
-  const setState = (updateValue) => {
-    states[stateIndexSnapshot] = updateValue;
-    // rerender();
-  };
-  return [states[stateIndexSnapshot], setState];
-};
-
-export const initializeStateIndex = () => {
-  stateIndex = 0;
-};
+  stateIndex++;
+  return [states[currentIndex], setState];
+}
