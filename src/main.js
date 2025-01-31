@@ -1,5 +1,15 @@
 import App from "./App.jsx";
-import React from "../libs/core/React";
+import render from "../libs/core/render.js";
 
-const app = document.getElementById("root");
-React.render(App(), app);
+const root = document.getElementById("root");
+
+function rerender() {
+  root.innerHTML = "";
+  const appElement = App();
+
+  render(appElement, root);
+}
+
+rerender();
+
+export default rerender;
