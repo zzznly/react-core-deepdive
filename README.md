@@ -16,4 +16,4 @@ React의 주요 개념과 동작 원리를 깊이 있게 학습하며, React-lik
 <br/>
 [[React 깊게 이해하기] 2. 렌더링 이해하기 (Virtual DOM, Reconcilation)](https://velog.io/@truth/React-%EA%B9%8A%EA%B2%8C-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0-2.-%EB%A0%8C%EB%8D%94%EB%A7%81-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0-Virtual-DOM-Reconcilation)
 <br/>
-[[React 깊게 이해하기] 3. 재렌더링 생략과 성능 최적화](https://velog.io/@truth/React-%EA%B9%8A%EA%B2%8C-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0-3.-%EC%9E%AC%EB%A0%8C%EB%8D%94%EB%A7%81-%EC%83%9D%EB%9E%B5%EA%B3%BC-%EC%84%B1%EB%8A%A5-%EC%B5%9C%EC%A0%81%ED%99%94-memo-useMemo-useCallback)
+[[React 깊게 이해하기] 3. 재렌더링 생략과 성능 최적화](https://velog.io/@truth/React-%EA%B9%8A%EA%B2%8C-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0-3.-%EC%9E%AC%EB%A0%8C%EB%8D%94%EB%A7%81-%EC%83%9D%EB%9E%B5-%EA%B3%BC%EC%A0%95%EA%B3%BC-%EB%A0%8C%EB%8D%94%EB%A7%81-%EC%B5%9C%EC%A0%81%ED%99%94-feat.-Fiber-Memoization)
