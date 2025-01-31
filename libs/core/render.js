@@ -1,4 +1,11 @@
 export default function render(vdom, container, oldDom = container.firstChild) {
+  console.log("Rendering VDOM:", vdom); // vdom이 정상적으로 들어오는지 확인
+
+  if (!vdom) {
+    console.error("VDOM is undefined!", vdom);
+    return;
+  }
+
   if (typeof vdom === "string" || typeof vdom === "number") {
     if (oldDom && oldDom.nodeType === 3) {
       if (oldDom.nodeValue !== String(vdom)) {
@@ -11,16 +18,16 @@ export default function render(vdom, container, oldDom = container.firstChild) {
     return;
   }
 
-  if (typeof vdom.type === "function") {
-    const componentVdom = vdom.type(vdom.props);
+  if (typeof vdom.node.type === "function") {
+    const componentVdom = vdom.node.type(vdom.node.props);
     render(componentVdom, container, oldDom);
     return;
   }
 
   let domElement = oldDom;
 
-  if (!domElement || domElement.nodeName.toLowerCase() !== vdom.type) {
-    domElement = document.createElement(vdom.type);
+  if (!domElement || domElement.nodeName.toLowerCase() !== vdom.node.type) {
+    domElement = document.createElement(vdom.node.type);
     if (oldDom) {
       container.replaceChild(domElement, oldDom);
     } else {
@@ -29,7 +36,7 @@ export default function render(vdom, container, oldDom = container.firstChild) {
   }
 
   const prevProps = oldDom?._vdom?.props || {};
-  const nextProps = vdom.props || {};
+  const nextProps = vdom.node.props || {};
 
   // 1. 이전 props와 현재 props가 동일하면 렌더링 건너뛰기
   if (!hasPropsChanged(prevProps, nextProps)) {
