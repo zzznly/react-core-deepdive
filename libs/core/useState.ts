@@ -1,13 +1,13 @@
 import rerender from "../../src/main";
 
-let states = [];
+let states: any[] = [];
 let stateIndex = 0;
 
-export function useState(initialValue) {
+export function useState<T>(initialValue: T) {
   const currentIndex = stateIndex;
   states[currentIndex] = states[currentIndex] ?? initialValue;
 
-  function setState(newValue) {
+  function setState(newValue: T) {
     states[currentIndex] = newValue;
     rerender();
   }
