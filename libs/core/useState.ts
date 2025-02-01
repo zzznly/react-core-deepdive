@@ -1,4 +1,4 @@
-import rerender from "../../src/main";
+import { rerender } from "./render";
 
 let states: any[] = [];
 let stateIndex = 0;

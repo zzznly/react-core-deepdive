@@ -1,17 +1,17 @@
 import { VirtualNode } from "../vtu/type";
 
-let currentVirtualDom;
-let rootElement;
+let currentVnode: VirtualNode;
+let rootElement: HTMLElement;
 
 export const render = (vnode: VirtualNode, container: HTMLElement) => {
-  rootElement = container; // rootElement를 최초 렌더(mount)시 등록
-  currentVirtualDom = vnode; // 현재 virtualDOM Node를 최초 mount된 컴포넌트로 등록
-  console.log("render - vNode", vnode);
-  const element = createVirtualDom(vnode);
+  rootElement = container;
+  currentVnode = vnode;
+  console.log("render - vnode", vnode);
+  const element = createVirtualNode(vnode);
   container.appendChild(element);
 };
 
-export const createVirtualDom = (vnode: VirtualNode) => {
+const createVirtualNode = (vnode: VirtualNode) => {
   if (typeof vnode.node === "string" || typeof vnode.node === "number") {
     return document.createTextNode(vnode.node as string);
   }
@@ -24,7 +24,7 @@ export const createVirtualDom = (vnode: VirtualNode) => {
 
   if (vnode.node.children) {
     vnode.node.children.forEach((child: VirtualNode) => {
-      domElement.appendChild(createVirtualDom(child));
+      domElement.appendChild(createVirtualNode(child));
     });
   }
   vnode.node.ref = domElement;
@@ -32,9 +32,9 @@ export const createVirtualDom = (vnode: VirtualNode) => {
 };
 
 export const rerender = (
-  rootElement: HTMLElement,
-  currentVnode: VirtualNode
+  root: HTMLElement = rootElement,
+  currentNode: VirtualNode = currentVnode
 ) => {
-  rootElement.innerHTML = "";
-  render(currentVnode, rootElement);
+  root.innerHTML = "";
+  render(currentNode, root);
 };
