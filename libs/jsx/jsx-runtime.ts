@@ -25,23 +25,12 @@ export const createElement = (
     }) as (VirtualNode | VirtualDOMType)[],
   };
 
-  const node: VirtualNode = { node: element };
-  console.log("### create element: ", element, node);
-
-  return node;
+  return { node: element };
 };
 
 export const jsx = createElement;
 
 const isVirtualNode = (obj: any): obj is VirtualNode => {
-  console.log(
-    "### isVirtualNode: ",
-    obj,
-    !Array.isArray(obj) &&
-      typeof obj === "object" &&
-      obj != null &&
-      "node" in obj
-  );
   return (
     !Array.isArray(obj) &&
     typeof obj === "object" &&
