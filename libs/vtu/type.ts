@@ -1,17 +1,13 @@
-export interface VirtualDOM {
-  node: VirtualNode;
+export interface VirtualNode {
+  node: VirtualDOM | VirtualDOMType;
 }
 
-export type VirtualNode = {
-  type: VirtualNodeType;
+export type VirtualDOM = {
+  type: VirtualDOMType;
   props: Record<string, unknown> | null;
-  children: (VirtualDOM | VirtualNode)[];
+  children: (VirtualNode | VirtualDOMType)[];
 };
 
-export type VirtualNodeType =
-  | HTMLElementTagNameMap
-  | string
-  | number
-  | Function;
+export type VirtualDOMType = HTMLElementTagNameMap | string | number | Function;
 
-export type JSXElement = VirtualDOM;
+export type JSXElement = VirtualNode;

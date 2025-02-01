@@ -2,42 +2,50 @@ import {
   JSXElement,
   VirtualDOM,
   VirtualNode,
-  VirtualNodeType,
+  VirtualDOMType,
 } from "../vtu/type";
 
 export const createElement = (
-  type: VirtualNodeType,
+  type: VirtualDOMType,
   props: Record<string, unknown> | null,
-  ...children: (VirtualDOM | VirtualNode)[]
+  ...children: (VirtualDOM | VirtualNode | string | number)[]
 ): JSXElement => {
   if (typeof type === "function") {
     return type({ ...props, children });
   }
 
   const element: VirtualDOM = {
-    node: {
-      type,
-      props,
-      children: children.flat(Infinity).map((v) => {
-        // children 배열이 중첩 배열 일 수 있어, flatten 하여 하나의 배열로 만들기
-        if (!checkIsVirtualNode(v)) {
-          return { node: v };
-        }
-        return v;
-      }),
-    },
+    type,
+    props,
+    children: children.flat(Infinity).map((v) => {
+      if (!isVirtualNode(v)) {
+        return { node: v };
+      }
+      return v;
+    }) as (VirtualNode | VirtualDOMType)[],
   };
 
-  return element;
+  const node: VirtualNode = { node: element };
+  console.log("### create element: ", element, node);
+
+  return node;
 };
 
 export const jsx = createElement;
 
-const checkIsVirtualNode = (obj: VirtualDOM | VirtualNode): boolean => {
+const isVirtualNode = (obj: any): obj is VirtualNode => {
+  console.log(
+    "### isVirtualNode: ",
+    obj,
+    !Array.isArray(obj) &&
+      typeof obj === "object" &&
+      obj != null &&
+      "node" in obj
+  );
   return (
+    !Array.isArray(obj) &&
     typeof obj === "object" &&
-    obj !== null &&
-    "node" in obj &&
-    !Array.isArray(obj)
+    obj != null &&
+    "node" in obj
   );
 };

@@ -4,11 +4,10 @@ import Content from "./components/content/Content";
 
 export default function App() {
   return (
-    <div id="root">
-      <p>My React Library</p>
+    <div id="app">
       <Header />
       <Content />
-      {/* <Counter /> */}
+      <Counter />
     </div>
   );
 }
