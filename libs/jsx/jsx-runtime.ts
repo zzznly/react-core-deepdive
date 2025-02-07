@@ -12,17 +12,17 @@ export const createElement = <P = {}>(
 ): JSXElement => {
   // TODO: 함수형 컴포넌트 처리 ?
   if (typeof type === "function") {
-    console.log("## jsx - type: ", type, typeof type);
-    // return createElement(type({ props, children }));
+    return type(props, ...children);
   }
 
   const element: ReactElement<P> = {
     type,
     props: {
       ...props,
-      children,
+      children: children.flat(),
     },
   };
+  console.log("## jsx - element: ", element);
 
   return element;
 };
