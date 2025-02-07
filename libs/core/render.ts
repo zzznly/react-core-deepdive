@@ -173,5 +173,5 @@ export const rerender = (
 
   updateDOM(root, currentVnode, newVnode);
   currentVnode = newVnode;
-  console.log("rerender - updating DOM...", root, newVnode);
+  console.log("rerendering...", root, newVnode);
 };
