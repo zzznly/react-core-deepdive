@@ -1,40 +1,30 @@
 import {
   JSXElement,
-  VirtualDOM,
-  VirtualNode,
-  VirtualDOMType,
-} from "../vtu/type";
+  ReactElementType,
+  ReactElement,
+  ReactNode,
+} from "../types/virtual-dom";
 
-export const createElement = (
-  type: VirtualDOMType,
-  props: Record<string, unknown> | null,
-  ...children: (VirtualDOM | VirtualNode | string | number)[]
+export const createElement = <P = {}>(
+  type: ReactElementType,
+  props: P & { children?: ReactNode } = {} as P & { children?: ReactNode },
+  ...children: ReactNode[]
 ): JSXElement => {
+  // TODO: 함수형 컴포넌트 처리 ?
   if (typeof type === "function") {
-    return type({ ...props, children });
+    console.log("## jsx - type: ", type, typeof type);
+    // return createElement(type({ props, children }));
   }
 
-  const element: VirtualDOM = {
+  const element: ReactElement<P> = {
     type,
-    props,
-    children: children.flat(Infinity).map((v) => {
-      if (!isVirtualNode(v)) {
-        return { node: v };
-      }
-      return v;
-    }) as (VirtualNode | VirtualDOMType)[],
+    props: {
+      ...props,
+      children,
+    },
   };
 
-  return { node: element };
+  return element;
 };
 
 export const jsx = createElement;
-
-const isVirtualNode = (obj: any): obj is VirtualNode => {
-  return (
-    !Array.isArray(obj) &&
-    typeof obj === "object" &&
-    obj != null &&
-    "node" in obj
-  );
-};

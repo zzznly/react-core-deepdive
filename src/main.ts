@@ -1,5 +1,5 @@
 import App from "./App.jsx";
-import { rerender } from "../libs/core/render.ts";
+import { render, rerender } from "../libs/core/render.ts";
 
 const root = document.getElementById("root");
-rerender(root, App());
+render(root, App());
