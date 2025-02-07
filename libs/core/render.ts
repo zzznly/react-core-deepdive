@@ -1,40 +1,169 @@
-import { VirtualNode } from "../vtu/type";
+import {
+  ReactElement,
+  ReactNode,
+  FunctionComponent,
+} from "../types/virtual-dom";
 
-let currentVnode: VirtualNode;
+let currentVnode: ReactElement;
 let rootElement: HTMLElement;
 
-export const render = (vnode: VirtualNode, container: HTMLElement) => {
-  rootElement = container;
-  currentVnode = vnode;
-  console.log("render - vnode", vnode);
-  const element = createVirtualNode(vnode);
-  container.appendChild(element);
-};
-
-const createVirtualNode = (vnode: VirtualNode) => {
-  if (typeof vnode.node === "string" || typeof vnode.node === "number") {
-    return document.createTextNode(vnode.node as string);
+/**
+ * Virtual DOM을 실제 DOM으로 변환하는 함수 (초기 렌더링시)
+ */
+const createDOM = (vnode: ReactElement | string | number): Node => {
+  if (typeof vnode === "string" || typeof vnode === "number") {
+    return document.createTextNode(vnode.toString());
   }
-  const domElement = document.createElement(vnode.node.type);
 
-  if (vnode.node.props)
-    Object.keys(vnode.node.props).forEach((key) => {
-      domElement[key] = vnode.node.props[key];
-    });
-
-  if (vnode.node.children) {
-    vnode.node.children.forEach((child: VirtualNode) => {
-      domElement.appendChild(createVirtualNode(child));
-    });
+  if (typeof vnode.type === "function") {
+    const component = vnode.type as FunctionComponent<any>;
+    return createDOM(component(vnode.props) as ReactElement); // 함수형 컴포넌트 실행
   }
-  vnode.node.ref = domElement;
+
+  const domElement = document.createElement(vnode.type as string);
+
+  applyProps(domElement, {}, vnode.props); // props 적용
+
+  if (Array.isArray(vnode.props.children)) {
+    vnode.props.children.forEach((child: ReactElement) => {
+      if (child !== null && child !== undefined) {
+        domElement.appendChild(createDOM(child));
+      }
+    });
+  } else if (
+    typeof vnode.props.children === "string" ||
+    typeof vnode.props.children === "number"
+  ) {
+    domElement.appendChild(
+      document.createTextNode(vnode.props.children.toString())
+    );
+  }
+
+  vnode.ref && (vnode.ref.current = domElement);
   return domElement;
 };
 
+/**
+ * 기존 DOM을 업데이트하는 함수 (재렌더링)
+ */
+const updateDOM = (
+  parent: HTMLElement,
+  oldVnode: ReactElement,
+  newVnode: ReactElement
+) => {
+  // 1. type이 다르면 DOM 엘리먼트 교체
+  if (oldVnode.type !== newVnode.type) {
+    parent.replaceChild(createDOM(newVnode), parent.firstChild!);
+    return;
+  }
+
+  // 2. props 변경시 newProps, oldProps 비교하여 변경된 부분만 업데이트
+  applyProps(parent, oldVnode.props, newVnode.props);
+
+  // 3. children 변경시 기존 children과 새로운 children을 비교하여 변경된 부분만 업데이트
+  updateChildren(parent, oldVnode.props.children, newVnode.props.children);
+};
+
+/**
+ * props 비교하여 변경된 부분만 적용하는 함수
+ */
+const applyProps = (dom: HTMLElement, oldProps: any, newProps: any) => {
+  // 얕은 비교 수행 (Shallow Comparision)
+  // - 객체의 1차 속성의 참조(Reference)만 비교
+  // - 객체 내부의 중첩된 값이 변했는지는 검사하지 않음
+
+  // 기존 props중 없는 속성 제거
+  Object.keys(oldProps).forEach((key) => {
+    if (!(key in newProps)) {
+      dom.removeAttribute(key);
+    }
+  });
+  Object.entries(newProps).forEach(([key, value]) => {
+    /**
+     * Reconcilation (재조정)
+     */
+    if (oldProps[key] === newProps[key]) {
+      return; // props가 변경되지 않음 -> 업데이트 생략 (= 재렌더링 생략)
+    }
+
+    if (key.startsWith("on") && typeof value === "function") {
+      // 이벤트 핸들러 업데이트 (onClick, onChange 등)
+      const eventType = key.slice(2).toLowerCase();
+      dom.removeEventListener(eventType, oldProps[key]);
+      dom.addEventListener(eventType, value);
+    } else {
+      // 일반 props 업데이트
+      dom.setAttribute(key, value as string);
+    }
+  });
+};
+
+/**
+ * 기존 children과 새로운 children을 비교하여 변경된 부분만 업데이트
+ */
+const updateChildren = (
+  parent: HTMLElement,
+  oldChildren: ReactNode,
+  newChildren: ReactNode
+) => {
+  if (!Array.isArray(newChildren)) newChildren = [newChildren];
+  if (!Array.isArray(oldChildren)) oldChildren = [oldChildren];
+
+  const maxLength = Math.max(oldChildren.length, newChildren.length);
+  for (let i = 0; i < maxLength; i++) {
+    const oldChild = oldChildren[i];
+    const newChild = newChildren[i];
+
+    /** Reconcilation (재조정)
+     * old child, new child 비교하여 변경된 부분만 업데이트
+     */
+    if (oldChild === newChild) {
+      continue; // children 변경되지 않음 -> 업데이트 생략 (= 재렌더링 생략)
+    }
+    if (newChild === undefined) {
+      parent.removeChild(parent.childNodes[i]); // 삭제된 children
+      continue;
+    }
+    if (oldChild === undefined) {
+      parent.appendChild(createDOM(newChild as ReactElement)); // 추가된 children
+
+      continue;
+    }
+    if (typeof oldChild === "string" || typeof newChild === "string") {
+      if (oldChild !== newChild) {
+        parent.childNodes[i].textContent = newChild as string;
+      }
+      continue;
+    }
+
+    updateDOM(
+      parent.childNodes[i] as HTMLElement,
+      oldChild as ReactElement,
+      newChild as ReactElement
+    );
+  }
+};
+
+/**
+ * 초기 렌더링
+ */
+export const render = (vnode: ReactElement, container: HTMLElement) => {
+  rootElement = container;
+  currentVnode = vnode;
+  console.log("render - vnode", vnode);
+
+  const element = createDOM(vnode);
+  container.innerHTML = "";
+  container.appendChild(element);
+};
+
+/**
+ * Virtual DOM을 업데이트하는 함수
+ */
 export const rerender = (
   root: HTMLElement = rootElement,
-  currentNode: VirtualNode = currentVnode
+  newVnode: ReactElement = currentVnode
 ) => {
-  root.innerHTML = "";
-  render(currentNode, root);
+  updateDOM(root, currentVnode, newVnode);
+  currentVnode = newVnode;
 };
