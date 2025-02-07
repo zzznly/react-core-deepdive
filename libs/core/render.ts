@@ -15,13 +15,15 @@ const createDOM = (vnode: ReactElement | string | number): Node => {
     return document.createTextNode(vnode.toString());
   }
 
+  console.log('## createDOM - ReactElement type: ', vnode.type, typeof vnode.type);
+
   if (typeof vnode.type === "function") {
     const component = vnode.type as FunctionComponent<any>;
-    return createDOM(component(vnode.props) as ReactElement); // 함수형 컴포넌트 실행
+    const renderedVnode = component(vnode.props); // 함수형 컴포넌트 실행
+    return createDOM(renderedVnode as ReactElement); // 재귀적으로 실행 - 실행 결과를 다시 실제 DOM으로 변환
   }
 
   const domElement = document.createElement(vnode.type as string);
-
   applyProps(domElement, {}, vnode.props); // props 적용
 
   if (Array.isArray(vnode.props.children)) {
@@ -51,6 +53,11 @@ const updateDOM = (
   oldVnode: ReactElement,
   newVnode: ReactElement
 ) => {
+  if (!oldVnode) {
+    parent.appendChild(createDOM(newVnode));
+    return;
+  }
+
   // 1. type이 다르면 DOM 엘리먼트 교체
   if (oldVnode.type !== newVnode.type) {
     parent.replaceChild(createDOM(newVnode), parent.firstChild!);
@@ -79,6 +86,8 @@ const applyProps = (dom: HTMLElement, oldProps: any, newProps: any) => {
     }
   });
   Object.entries(newProps).forEach(([key, value]) => {
+    if (key === "children") return; // children을 속성으로 설정하지 않음!
+
     /**
      * Reconcilation (재조정)
      */
@@ -114,21 +123,20 @@ const updateChildren = (
     const oldChild = oldChildren[i];
     const newChild = newChildren[i];
 
-    /** Reconcilation (재조정)
-     * old child, new child 비교하여 변경된 부분만 업데이트
-     */
     if (oldChild === newChild) {
-      continue; // children 변경되지 않음 -> 업데이트 생략 (= 재렌더링 생략)
+      continue; // 변경되지 않음 -> 업데이트 생략
     }
+
     if (newChild === undefined) {
       parent.removeChild(parent.childNodes[i]); // 삭제된 children
       continue;
     }
-    if (oldChild === undefined) {
-      parent.appendChild(createDOM(newChild as ReactElement)); // 추가된 children
 
+    if (oldChild === undefined) {
+      parent.appendChild(createDOM(newChild as ReactElement)); // oldChild가 없으면 새로 추가
       continue;
     }
+
     if (typeof oldChild === "string" || typeof newChild === "string") {
       if (oldChild !== newChild) {
         parent.childNodes[i].textContent = newChild as string;
@@ -138,7 +146,7 @@ const updateChildren = (
 
     updateDOM(
       parent.childNodes[i] as HTMLElement,
-      oldChild as ReactElement,
+      oldChild as ReactElement, // oldChild가 존재하는 경우만 updateDOM() 호출
       newChild as ReactElement
     );
   }
@@ -147,10 +155,11 @@ const updateChildren = (
 /**
  * 초기 렌더링
  */
-export const render = (vnode: ReactElement, container: HTMLElement) => {
+export const render = (container: HTMLElement, vnode: ReactElement) => {
   rootElement = container;
   currentVnode = vnode;
   console.log("render - vnode", vnode);
+  console.log("render - element", createDOM(vnode));
 
   const element = createDOM(vnode);
   container.innerHTML = "";
@@ -160,10 +169,17 @@ export const render = (vnode: ReactElement, container: HTMLElement) => {
 /**
  * Virtual DOM을 업데이트하는 함수
  */
+
 export const rerender = (
   root: HTMLElement = rootElement,
   newVnode: ReactElement = currentVnode
 ) => {
+  if (!currentVnode) {
+    // 기존 Virtual DOM이 없으면 새로 렌더링
+    render(newVnode, root);
+    return;
+  }
+
   updateDOM(root, currentVnode, newVnode);
   currentVnode = newVnode;
 };
