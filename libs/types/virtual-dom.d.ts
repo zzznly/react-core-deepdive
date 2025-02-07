@@ -1,18 +1,3 @@
-// export interface VirtualDOM {
-//   node: ReactElement;
-// }
-
-// export type ReactElement = {
-//   type: ReactElementType;
-//   props: Record<string, unknown> | null;
-//   children: (VirtualDOM | string | number)[];
-//   ref?: any;
-// };
-
-// export type ReactElementType = keyof HTMLElementTagNameMap | string | Function;
-
-// export type JSXElement = VirtualDOM;
-
 export type ReactElement<
   P = any,
   T extends ReactElementType = ReactElementType
